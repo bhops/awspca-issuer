@@ -19,8 +19,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/go-logr/logr"
 	api "github.com/awspca-issuer/api/v1alpha2"
+	"github.com/go-logr/logr"
 	core "k8s.io/api/core/v1"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -36,8 +36,8 @@ func newAWSPCAStatusReconciler(r *AWSPCAIssuerReconciler,
 	log logr.Logger) *AWSPCAStatusReconciler {
 	return &AWSPCAStatusReconciler{
 		AWSPCAIssuerReconciler: r,
-		issuer:               iss,
-		logger:               log,
+		issuer:                 iss,
+		logger:                 log,
 	}
 }
 

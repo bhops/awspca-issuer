@@ -86,18 +86,17 @@ func (r *AWSPCAIssuerReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error
 		return ctrl.Result{}, err
 	}
 
-	accessKey, ok = secret.Data[iss.Spec.Provisioner.AccessKeyRef.Key]
+	accessKey, accessKeyOk := secret.Data[iss.Spec.Provisioner.AccessKeyRef.Key]
+	secretKey, secretKeyOk := secret.Data[iss.Spec.Provisioner.SecretKeyRef.Key]
 
-	if !ok {
+	if !accessKeyOk && secretKeyOk {
 		err := fmt.Errorf("secret %s does not contain key %s", secret.Name, iss.Spec.Provisioner.AccessKeyRef.Key)
 		log.Error(err, "failed to retrieve AWS access key from secret", "namespace", secretNamespaceName.Namespace, "name", secretNamespaceName.Name)
 		statusReconciler.UpdateNoError(ctx, api.ConditionFalse, "NotFound", "Failed to retrieve AWS access key from secret: %v", err)
 		return ctrl.Result{}, err
 	}
 
-	secretKey, ok = secret.Data[iss.Spec.Provisioner.SecretKeyRef.Key]
-
-	if !ok {
+	if !secretKeyOk && accessKeyOk {
 		err := fmt.Errorf("secret %s does not contain key %s", secret.Name, iss.Spec.Provisioner.SecretKeyRef.Key)
 		log.Error(err, "failed to retrieve AWS secret key from secret", "namespace", secretNamespaceName.Namespace, "name", secretNamespaceName.Name)
 		statusReconciler.UpdateNoError(ctx, api.ConditionFalse, "NotFound", "Failed to retrieve AWS secret key from secret: %v", err)
@@ -147,10 +146,10 @@ func validateAWSPCAIssuerSpec(s api.AWSPCAIssuerSpec) error {
 	switch {
 	case s.Provisioner.Name == "":
 		return fmt.Errorf("spec.provisioner.name cannot be empty")
-	case s.Provisioner.AccessKeyRef.Key == "":
-		return fmt.Errorf("spec.provisioner.accesskeyRef.key cannot be empty")
-	case s.Provisioner.SecretKeyRef.Key == "":
-		return fmt.Errorf("spec.provisioner.secretkeyRef.key cannot be empty")
+	case s.Provisioner.AccessKeyRef.Key == "" && s.Provisioner.SecretKeyRef.Key != "":
+		return fmt.Errorf("spec.provisioner.accesskeyRef.key cannot be empty when spec.provisioner.secretkeyRef.key is set")
+	case s.Provisioner.SecretKeyRef.Key == "" && s.Provisioner.AccessKeyRef.Key != "":
+		return fmt.Errorf("spec.provisioner.secretkeyRef.key cannot be empty when spec.provisioner.accessKeyRef.key is set")
 	case s.Provisioner.RegionRef.Key == "":
 		return fmt.Errorf("spec.provisioner.regionRef.key cannot be empty")
 	case s.Provisioner.ArnRef.Key == "":

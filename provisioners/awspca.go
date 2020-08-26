@@ -41,8 +41,8 @@ type AWSPCA struct {
 type AWSPCAProvisioner struct {
 	accesskey string
 	secretkey string
-	region string
-	arn string
+	region    string
+	arn       string
 }
 
 func NewProvisioner(accesskey string,
@@ -92,19 +92,23 @@ func (p *AWSPCAProvisioner) Sign(ctx context.Context, cr *certmanager.Certificat
 		MaxRetries: aws.Int(3),
 	}))
 
+	var creds *credentials.Credentials
+	if p.accesskey != "" && p.secretkey != "" {
+		creds = credentials.NewStaticCredentials(p.accesskey, p.secretkey, "")
+	}
+
 	svc := acmpca.New(sess, &aws.Config{
-		Region: aws.String(p.region),
-		Credentials:      credentials.NewStaticCredentials(p.accesskey,
-			p.secretkey, ""),
+		Region:      aws.String(p.region),
+		Credentials: creds,
 	})
 
 	cparams := acmpca.IssueCertificateInput{
 		CertificateAuthorityArn: aws.String(p.arn),
-		SigningAlgorithm: aws.String(acmpca.SigningAlgorithmSha256withrsa),
-		Csr: cr.Spec.CSRPEM,
-		Validity: &acmpca.Validity {
-			Type: aws.String(acmpca.ValidityPeriodTypeDays),
-			Value: aws.Int64(int64(cr.Spec.Duration.Hours()/24)),
+		SigningAlgorithm:        aws.String(acmpca.SigningAlgorithmSha256withrsa),
+		Csr:                     cr.Spec.CSRPEM,
+		Validity: &acmpca.Validity{
+			Type:  aws.String(acmpca.ValidityPeriodTypeDays),
+			Value: aws.Int64(int64(cr.Spec.Duration.Hours() / 24)),
 		},
 		IdempotencyToken: aws.String("awspca"),
 	}
@@ -117,8 +121,8 @@ func (p *AWSPCAProvisioner) Sign(ctx context.Context, cr *certmanager.Certificat
 
 	// wait for cert
 
-	cparams2 := acmpca.GetCertificateInput {
-		CertificateArn: aws.String(*output.CertificateArn),
+	cparams2 := acmpca.GetCertificateInput{
+		CertificateArn:          aws.String(*output.CertificateArn),
 		CertificateAuthorityArn: aws.String(p.arn),
 	}
 

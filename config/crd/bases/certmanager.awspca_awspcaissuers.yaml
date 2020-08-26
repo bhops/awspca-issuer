@@ -4,7 +4,7 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.2.5
+    controller-gen.kubebuilder.io/version: v0.3.0
   creationTimestamp: null
   name: awspcaissuers.certmanager.awspca
 spec:
@@ -40,20 +40,48 @@ spec:
               description: Provisioner contains the AWS Private CA certificates provisioner
                 configuration.
               properties:
-                accesskey:
-                  description: Names is the name of the JWK provisioner.
+                accesskeyRef:
+                  description: Reference to AWS access key. Required if SecretKeyRef
+                    is specified.
+                  properties:
+                    key:
+                      description: The key of the secret to select from. Must be a
+                        valid secret key.
+                      type: string
+                  type: object
+                arnRef:
+                  description: Reference to private CA ARN
+                  properties:
+                    key:
+                      description: The key of the secret to select from. Must be a
+                        valid secret key.
+                      type: string
+                  type: object
+                name:
+                  description: The name of the secret in the pod's namespace to select
+                    from.
                   type: string
-                arn:
-                  type: string
-                region:
-                  type: string
-                secretkey:
-                  type: string
+                regionRef:
+                  description: Reference to AWS region
+                  properties:
+                    key:
+                      description: The key of the secret to select from. Must be a
+                        valid secret key.
+                      type: string
+                  type: object
+                secretkeyRef:
+                  description: Reference to AWS secret key. Required if AccessKeyRef
+                    is specified.
+                  properties:
+                    key:
+                      description: The key of the secret to select from. Must be a
+                        valid secret key.
+                      type: string
+                  type: object
               required:
-              - accesskey
-              - arn
-              - region
-              - secretkey
+              - arnRef
+              - name
+              - regionRef
               type: object
           required:
           - provisioner

@@ -77,10 +77,12 @@ type AWSPCAProvisioner struct {
 	// The name of the secret in the pod's namespace to select from.
 	Name string `json:"name"`
 
-	// Reference to AWS access key
+	// Reference to AWS access key. Required if SecretKeyRef is specified.
+	// +optional
 	AccessKeyRef SecretKeySelector `json:"accesskeyRef"`
 
-	// Reference to AWS secret key
+	// Reference to AWS secret key. Required if AccessKeyRef is specified.
+	// +optional
 	SecretKeyRef SecretKeySelector `json:"secretkeyRef"`
 
 	// Reference to AWS region

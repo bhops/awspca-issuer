@@ -20,8 +20,8 @@ import (
 	awspcav1alpha2 "github.com/awspca-issuer/api/v1alpha2"
 	"os"
 
-	certmanager "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	"github.com/awspca-issuer/controllers"
+	certmanager "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
